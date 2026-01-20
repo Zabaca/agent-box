@@ -40,3 +40,6 @@ provision:
 
       # Add self to docker group
       sudo usermod -aG docker "$(whoami)"
+
+      # Add yolo alias for Claude Code
+      echo "alias yolo='claude --dangerously-skip-permissions'" >> ~/.bashrc
