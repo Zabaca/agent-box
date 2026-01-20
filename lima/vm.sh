@@ -18,8 +18,8 @@ mount_workspace() {
   if mount | grep -q "$MOUNT_PATH"; then
     echo "Already mounted at $MOUNT_PATH"
   else
-    sshfs -F <(limactl show-ssh --format config "$VM_NAME") \
-      "lima-${VM_NAME}:/agent-workspace" "$MOUNT_PATH" \
+    SSH_CONFIG="$HOME/.lima/$VM_NAME/ssh.config"
+    sshfs -F "$SSH_CONFIG" "lima-${VM_NAME}:/agent-workspace" "$MOUNT_PATH" \
       -o reconnect,ServerAliveInterval=15
     echo "Mounted to $MOUNT_PATH"
   fi
