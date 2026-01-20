@@ -1,10 +1,20 @@
 # Agent Box
 
-A VM environment for running Claude Code on macOS Apple Silicon.
+A sandboxed VM environment that gives Claude Code full sudo access on macOS Apple Silicon.
 
-## Overview
+## Why?
 
-This project provides a sandboxed Linux VM where Claude Code can operate with full sudo access and native filesystem performance. Your Mac observes the VM's workspace via SSHFS mount for collaboration.
+Claude Code is powerful but constrained on your host machine - it can't install system packages, run Docker containers freely, or modify system configurations without risking your environment.
+
+Agent Box solves this by giving Claude Code its own Linux VM with:
+- **Full sudo access** - install anything, modify system files, no restrictions
+- **Isolated environment** - mistakes don't affect your Mac
+- **Native filesystem performance** - fast I/O for all operations
+- **Observable workspace** - you can watch and collaborate via SSHFS mount
+
+Think of it as a sandbox where Claude Code can work autonomously while you observe.
+
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -62,13 +72,9 @@ vagrant destroy # Delete VM
 - Git
 - Claude Code CLI
 
-## Why This Architecture?
+## Why Not Traditional Shared Folders?
 
-Traditional shared folders (NFS, VirtFS/9P) have performance issues or don't work well with UTM. Instead:
-
-1. **VM has native filesystem** - Claude Code gets fast I/O
-2. **Host mounts into VM** - You observe via SSHFS (speed doesn't matter for observation)
-3. **Two-way sync** - Edit from either side
+NFS and VirtFS/9P have performance issues or don't work well with UTM. The reverse mount approach (host mounts into VM via SSHFS) gives Claude Code native filesystem speed while still allowing you to observe.
 
 ## License
 
