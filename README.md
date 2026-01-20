@@ -35,19 +35,17 @@ Think of it as a sandbox where Claude Code can work autonomously while you obser
 
 | Option | Complexity | Recommended |
 |--------|------------|-------------|
-| [Vagrant + UTM](vagrant/VAGRANT.md) | More setup, but automated triggers | ✓ |
-| [Lima](LIMA.md) | Simpler, manual mount script | |
+| [Vagrant + UTM](vagrant/VAGRANT.md) | More setup, but automated triggers | |
+| [Lima](lima/LIMA.md) | Simpler, recommended | ✓ |
 
 Both require [macFUSE setup](MACFUSE.md) for the SSHFS host mount.
 
-## Quick Start (Vagrant)
+## Quick Start (Lima)
 
 ### Prerequisites
 
 ```bash
-brew install --cask utm
-brew install vagrant
-vagrant plugin install vagrant_utm
+brew install lima
 brew install macfuse
 brew install gromgit/fuse/sshfs-mac
 ```
@@ -57,11 +55,11 @@ brew install gromgit/fuse/sshfs-mac
 ### Usage
 
 ```bash
-cd vagrant
-vagrant up      # Creates VM, provisions, auto-mounts ~/vm-workspace
-vagrant ssh     # Access the VM
-vagrant halt    # Stop VM (auto-unmounts)
-vagrant destroy # Delete VM
+cd lima
+./vm.sh start   # Creates VM, provisions, auto-mounts ~/vm-workspace
+./vm.sh ssh     # Access the VM
+./vm.sh stop    # Stop VM (auto-unmounts)
+./vm.sh destroy # Delete VM
 ```
 
 ## What's Installed in the VM

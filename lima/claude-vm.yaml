@@ -1,0 +1,33 @@
+# Lima VM configuration for Claude Code
+# Usage: limactl start claude-vm.yaml
+
+images:
+  - location: "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-arm64.img"
+    arch: "aarch64"
+
+cpus: 2
+memory: "4GiB"
+disk: "20GiB"
+
+# Disable default host→guest mounts (we do the reverse)
+mounts: []
+
+provision:
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux
+      export DEBIAN_FRONTEND=noninteractive
+
+      apt-get update
+      apt-get install -y docker.io nodejs npm git unzip
+
+      # Install Claude Code CLI
+      npm install -g @anthropic-ai/claude-code --no-audit
+
+      # Create workspace directory
+      mkdir -p /agent-workspace
+
+      # Add user to docker group and set ownership
+      usermod -aG docker ${LIMA_CIDATA_USER}
+      chown -R ${LIMA_CIDATA_USER}:${LIMA_CIDATA_USER} /agent-workspace
