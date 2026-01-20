@@ -9,8 +9,8 @@ start_vm() {
   if limactl list -q | grep -q "^${VM_NAME}$"; then
     limactl start "$VM_NAME" 2>/dev/null || true
   else
-    # First time creation
-    limactl start "$SCRIPT_DIR/claude-vm.yaml" --name="$VM_NAME"
+    # First time creation (--tty=false skips interactive prompt)
+    limactl start "$SCRIPT_DIR/claude-vm.yaml" --name="$VM_NAME" --tty=false
 
     # Restart to apply docker group membership
     echo "Restarting VM to apply docker group..."
