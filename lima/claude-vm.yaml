@@ -25,12 +25,18 @@ provision:
       # Install Claude Code CLI
       npm install -g @anthropic-ai/claude-code --no-audit
 
-      # Create workspace directory
+      # Create workspace directory with open permissions (user script will fix)
       mkdir -p /agent-workspace
+      chmod 777 /agent-workspace
 
-      # Find the non-root user (Lima creates user with same name as host)
-      LIMA_USER=$(getent passwd 1000 | cut -d: -f1)
+  - mode: user
+    script: |
+      #!/bin/bash
+      set -eux
 
-      # Add user to docker group and set ownership
-      usermod -aG docker "$LIMA_USER"
-      chown -R "$LIMA_USER:$LIMA_USER" /agent-workspace
+      # Fix workspace ownership (runs as the lima user)
+      sudo chown -R "$(whoami):$(whoami)" /agent-workspace
+      sudo chmod 755 /agent-workspace
+
+      # Add self to docker group
+      sudo usermod -aG docker "$(whoami)"
