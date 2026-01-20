@@ -1,0 +1,84 @@
+# Lima VM configuration for Claude Code
+# Usage: limactl start claude-vm.yaml
+
+images:
+  - location: "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-arm64.img"
+    arch: "aarch64"
+
+cpus: 2
+memory: "4GiB"
+disk: "20GiB"
+
+# Disable default host→guest mounts (we do the reverse)
+mounts: []
+
+provision:
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux
+      export DEBIAN_FRONTEND=noninteractive
+
+      apt-get update
+      apt-get install -y docker.io nodejs npm git unzip
+
+      # Install Claude Code CLI
+      npm install -g @anthropic-ai/claude-code --no-audit
+
+      # Create workspace directory with open permissions (user script will fix)
+      mkdir -p /agent-workspace
+      chmod 777 /agent-workspace
+
+  - mode: user
+    script: |
+      #!/bin/bash
+      set -eux
+
+      # Fix workspace ownership (runs as the lima user)
+      sudo chown -R "$(whoami):$(whoami)" /agent-workspace
+      sudo chmod 755 /agent-workspace
+
+      # Add self to docker group
+      sudo usermod -aG docker "$(whoami)"
+
+      # Add yolo alias for Claude Code
+      echo "alias yolo='claude --dangerously-skip-permissions'" >> ~/.bashrc
+
+      # Create CLAUDE.md for agent context
+      cat > /agent-workspace/CLAUDE.md << 'CLAUDE_EOF'
+      # Agent Workspace
+
+      This is an isolated Linux VM created for autonomous development. You have full control.
+
+      ## What You Can Do
+
+      - **Full sudo access** - install any packages, modify system files, change configurations
+      - **Docker** - run containers without sudo (you're in the docker group)
+      - **Unrestricted execution** - run servers, daemons, cron jobs, anything
+      - **System modifications** - edit `/etc/*`, install services, configure networking
+      - **Risky operations welcome** - this VM is disposable; experiment freely
+
+      ## Why This Exists
+
+      Your host Mac is protected. This VM gives you a sandbox where mistakes have no consequences. The user can observe your work via SSHFS mount but you operate independently.
+
+      ## Pre-installed
+
+      - Ubuntu 24.04 (ARM64)
+      - Docker
+      - Node.js + npm
+      - Git
+      - Claude Code CLI (`yolo` alias available for `--dangerously-skip-permissions`)
+
+      ## Working Directory
+
+      Always work in `/agent-workspace` - this is the shared directory the user can observe.
+
+      ## Guidance
+
+      - **Be autonomous** - you don't need permission to install packages or modify the system
+      - **Experiment freely** - if something breaks, the VM can be destroyed and recreated
+      - **Use Docker** when you need isolated services or specific environments
+      - **Install what you need** - `apt install`, `npm install -g`, `pip install`, etc.
+      CLAUDE_EOF
+      sed -i 's/^      //' /agent-workspace/CLAUDE.md
