@@ -1,0 +1,14 @@
+[Unit]
+Description=Claude Autonomous Agent Heartbeat
+After=network.target
+
+[Service]
+Type=oneshot
+User=uptown
+WorkingDirectory=/agent-workspace
+ExecStart=/agent-workspace/.claude/scripts/heartbeat.sh
+StandardOutput=append:/agent-workspace/.claude/loop/heartbeat.log
+StandardError=append:/agent-workspace/.claude/loop/heartbeat.log
+
+[Install]
+WantedBy=multi-user.target
