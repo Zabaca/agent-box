@@ -1,0 +1,39 @@
+# Credentials (never commit)
+credentials/*.txt
+credentials/*.key
+credentials/*.json
+!credentials/README.md
+
+# Runtime state
+loop/state.json
+loop/email-inbox-state.json
+loop/claude.lock
+loop/*.log
+
+# Generated files
+dashboard.html
+health.json
+notifications.md
+
+# Logs
+logs/
+*.log
+
+# Processed items
+inbox/processed/
+inbox/processed-emails/
+
+# Checkpoints and snapshots
+checkpoints/
+snapshots/
+backups/
+
+# Browser data
+browser/profile/
+
+# Sessions
+sessions/
+
+# Config (has real values)
+config/*.json
+!config/*.template
