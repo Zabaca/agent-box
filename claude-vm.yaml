@@ -5,8 +5,8 @@ images:
   - location: "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-arm64.img"
     arch: "aarch64"
 
-cpus: 2
-memory: "4GiB"
+cpus: 4
+memory: "6GiB"
 disk: "20GiB"
 
 # Disable default host→guest mounts (we do the reverse)
@@ -20,10 +20,10 @@ provision:
       export DEBIAN_FRONTEND=noninteractive
 
       apt-get update
-      apt-get install -y docker.io nodejs npm git unzip
+      apt-get install -y docker.io nodejs npm git unzip curl jq ripgrep
 
-      # Install Claude Code CLI
-      npm install -g @anthropic-ai/claude-code --no-audit
+      # Claude Code CLI is installed per-user via the native installer (next stage).
+      # Native installer auto-updates in the background; no npm dependency tree.
 
       # Create workspace directory with open permissions (user script will fix)
       mkdir -p /agent-workspace
@@ -40,6 +40,13 @@ provision:
 
       # Add self to docker group
       sudo usermod -aG docker "$(whoami)"
+
+      # Install Claude Code CLI via the native installer.
+      # Lands at ~/.local/bin/claude. Auto-updates in the background.
+      curl -fsSL https://claude.ai/install.sh | bash
+
+      # Ensure ~/.local/bin is on PATH for interactive shells
+      grep -q '\.local/bin' ~/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
       # Add yolo alias for Claude Code
       echo "alias yolo='claude --dangerously-skip-permissions'" >> ~/.bashrc
