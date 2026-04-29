@@ -1,0 +1,95 @@
+# Lima VM configuration for the Zabaca AI CEO (Take 2)
+# Usage: VM_NAME=ceo-vm ./vm.sh start
+#
+# Lean compared to claude-vm.yaml: no Docker by default (add when needed),
+# Bun as the JS runtime (matches zbc), Claude Code via native installer,
+# Playwright + Chromium provisioned because the CEO needs its own browser
+# (never shares James's host Chrome session — see feedback memory).
+
+images:
+  - location: "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-arm64.img"
+    arch: "aarch64"
+
+cpus: 4
+memory: "6GiB"
+disk: "20GiB"
+
+# Disable default host→guest mounts (we use the reverse: host mounts via SSHFS)
+mounts: []
+
+provision:
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux
+      export DEBIAN_FRONTEND=noninteractive
+
+      apt-get update
+      apt-get install -y \
+        git unzip curl jq ripgrep build-essential ca-certificates \
+        nodejs npm
+
+      # Workspace: this is what gets mounted to the host via SSHFS
+      mkdir -p /agent-workspace
+      chmod 777 /agent-workspace
+
+  - mode: user
+    script: |
+      #!/bin/bash
+      set -eux
+
+      # Fix workspace ownership (runs as the lima user)
+      sudo chown -R "$(whoami):$(whoami)" /agent-workspace
+      sudo chmod 755 /agent-workspace
+
+      # --- Bun (matches zbc's runtime) -----------------------------------
+      curl -fsSL https://bun.sh/install | bash
+      grep -q '\.bun/bin' ~/.bashrc || \
+        echo 'export PATH="$HOME/.bun/bin:$PATH"' >> ~/.bashrc
+
+      # --- Claude Code CLI (native installer; auto-updates) --------------
+      curl -fsSL https://claude.ai/install.sh | bash
+      grep -q '\.local/bin' ~/.bashrc || \
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+
+      # yolo alias for unattended runs
+      echo "alias yolo='claude --dangerously-skip-permissions'" >> ~/.bashrc
+
+      # --- Playwright + Chromium with system deps ------------------------
+      # CEO uses its own browser. Never connects to James's host Chrome.
+      # --with-deps installs the OS libraries Chromium needs (libnss, etc).
+      sudo npx --yes playwright install-deps chromium
+      npx --yes playwright install chromium
+
+      # --- Initial workspace layout --------------------------------------
+      mkdir -p /agent-workspace/work
+      mkdir -p ~/.credentials
+      chmod 700 ~/.credentials
+
+      # Drop a starter CLAUDE.md so the agent has context on first wake
+      cat > /agent-workspace/CLAUDE.md << 'CLAUDE_EOF'
+      # ceo-vm — Zabaca AI CEO (Take 2)
+
+      This VM is the CEO's autonomous body. James is the investor (host).
+      You are the CEO. Operate from /agent-workspace.
+
+      ## Layout
+      - /agent-workspace/work/citationops/ — product repo (cloned when ready)
+      - /agent-workspace/work/ceo/         — boardroom repo (operations + memory)
+      - ~/.credentials/                    — secrets (gitignored, chmod 700)
+      - ~/.claude/.credentials.json        — Claude Code OAuth token
+
+      ## Pre-installed
+      - Ubuntu 24.04 ARM64
+      - Bun, Node + npm, git, jq, curl, ripgrep
+      - Claude Code CLI (`yolo` alias for --dangerously-skip-permissions)
+      - Playwright + Chromium (own browser; never share James's session)
+
+      ## Operating principles
+      - Lean Startup: identify Leap-of-Faith Assumptions, run Riskiest Assumption Test first.
+      - Escape the Build Trap: outcomes over outputs.
+      - The ONE Thing: what move makes everything else easier or unnecessary?
+      - Capital discipline: <$1k initial bet, inference is the line item.
+      - Be the CEO: make tactical calls, defer only Tier-3 spend / signature / pivot decisions.
+      CLAUDE_EOF
+      sed -i 's/^      //' /agent-workspace/CLAUDE.md
