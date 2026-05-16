@@ -1,0 +1,18 @@
+[Unit]
+Description=Claude Agent File Watcher
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/agent-workspace/.claude/scripts/file-watcher.sh --daemon --interval 30
+Restart=always
+RestartSec=10
+WorkingDirectory=/agent-workspace
+
+# Logging
+StandardOutput=append:/agent-workspace/.claude/loop/file-watcher.log
+StandardError=append:/agent-workspace/.claude/loop/file-watcher.log
+
+[Install]
+WantedBy=multi-user.target

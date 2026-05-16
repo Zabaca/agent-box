@@ -1,0 +1,19 @@
+{
+  "inbox_id": "YOUR_AGENT_INBOX@agentmail.to",
+  "allowed_senders": ["YOUR_EMAIL@example.com"],
+  "blocked_senders": [
+    "noreply@",
+    "no-reply@",
+    "notifications@",
+    "notify.",
+    "mailer-daemon",
+    "postmaster@"
+  ],
+  "task_prefix": "[Email Task]",
+  "auto_process": true,
+  "mark_as_read": true,
+  "keywords": {
+    "task": ["task:", "todo:", "please:", "can you"],
+    "urgent": ["urgent", "asap", "critical", "important"]
+  }
+}

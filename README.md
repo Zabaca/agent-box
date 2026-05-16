@@ -75,6 +75,51 @@ After starting, the VM's workspace is mounted at:
 - Git
 - Claude Code CLI
 
+## Agent Loop System
+
+Agent Box includes an autonomous loop infrastructure that allows Claude Code to run continuously, processing tasks without human intervention.
+
+**Key Features:**
+- **Task Queue** - Pending tasks in `tasks.md` drive the loop
+- **Memory Injection** - Context persists across iterations via `memory.md`
+- **Heartbeat Daemon** - Restarts agent if it stops while tasks remain
+- **Email Integration** - Receive tasks and send notifications via AgentMail
+- **Skills System** - Reusable knowledge that grows over time
+
+**Available Skills:**
+| Skill | Purpose |
+|-------|---------|
+| agentmail | Email via AgentMail API |
+| browser-automation | Playwright browser control |
+| cloudflare-workers | Cloudflare deployment |
+| create-skill | Create new skills from learnings |
+| github-api | GitHub CLI operations |
+| npm-publish | npm publishing workflow |
+
+**Quick Start:**
+```bash
+# Add a task
+echo "- [ ] Build a REST API" >> ~/vm-workspace/.claude/loop/tasks.md
+
+# Or email a task to: agent-tasks@agentmail.to
+
+# Stop the loop
+touch ~/vm-workspace/.claude/loop/stop-signal
+```
+
+See **[agent-box-loop.md](agent-box-loop.md)** for complete documentation including architecture diagrams, state management, and all 50+ utility scripts.
+
+## Templates
+
+The `templates/` directory contains reusable configurations:
+
+- **`templates/agent-loop/`** - Complete autonomous agent infrastructure
+  - Stop hook for loop continuation
+  - Heartbeat daemon
+  - Email inbox/notifications
+  - 6 skills + skill creation system
+  - 50+ utility scripts
+
 ## Why Not Traditional Shared Folders?
 
 NFS and VirtFS/9P have performance issues or don't work well with UTM. The reverse mount approach (host mounts into VM via SSHFS) gives Claude Code native filesystem speed while still allowing you to observe.

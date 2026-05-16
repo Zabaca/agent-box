@@ -1,0 +1,12 @@
+{
+  "recipient": "YOUR_EMAIL@example.com",
+  "levels": {
+    "critical": { "email": true, "file": true },
+    "error": { "email": true, "file": true },
+    "warning": { "email": false, "file": true },
+    "info": { "email": false, "file": true },
+    "success": { "email": false, "file": true }
+  },
+  "sender_name": "Claude Agent",
+  "subject_prefix": "[Agent]"
+}
